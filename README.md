@@ -1,36 +1,117 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sehat Record
 
-## Getting Started
+Sehat Record is a polished local-demo MVP for an Indian healthtech startup. It brings scattered paper prescriptions into one searchable record, simplifies medicines for patients in safer plain language, and gives doctors a summary view that saves OPD time.
 
-First, run the development server:
+## What the MVP includes
+
+- Landing page with investor-demo-ready positioning
+- Demo mode with 3 seeded patient stories
+- Patient onboarding form
+- Prescription upload flow with mock OCR/extraction and manual review
+- Patient dashboard with search and date filters
+- Prescription detail page with patient-friendly medicine explanations
+- Patient timeline of visits, medicines, and tests
+- Doctor summary page with conditions, allergies, current medicines, repeated prescriptions, prior tests, and overlap flags
+- Profile/settings page for record ownership and edits
+- SQLite database with Prisma client access
+
+## Tech stack
+
+- Next.js 16 App Router
+- TypeScript
+- Tailwind CSS v4
+- Prisma Client
+- SQLite
+
+## Quick start
+
+1. Install dependencies.
+
+```bash
+npm install
+```
+
+2. Initialize the SQLite schema and generate the Prisma client.
+
+```bash
+npm run db:init
+npm run db:push
+```
+
+3. Seed the demo dataset.
+
+```bash
+npm run db:seed
+```
+
+4. Start the app.
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+5. Open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Demo data included
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The seed creates:
 
-## Learn More
+- 3 patients
+- 9 visits across multiple doctors
+- Chronic-care flow for diabetes and hypertension
+- Elderly-parent record management use case
+- Acute illness and respiratory follow-up use case
+- Overlapping medication patterns for doctor-summary review
+- Test recommendations across visits
 
-To learn more about Next.js, take a look at the following resources:
+## Core flows to show
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `Landing -> Demo -> Patient dashboard`
+- `Upload prescription -> Review extraction -> Save`
+- `Patient dashboard -> Prescription details`
+- `Patient dashboard -> Timeline`
+- `Patient dashboard -> Doctor summary`
+- `Demo -> New patient onboarding`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project structure
 
-## Deploy on Vercel
+```text
+src/
+  app/
+    api/
+    demo/
+    onboarding/
+    patients/[patientId]/
+    prescriptions/[prescriptionId]/
+  components/
+  lib/
+prisma/
+  schema.prisma
+  seed.mjs
+scripts/
+  init-db.mjs
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Notes on the mock extraction pipeline
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The MVP uses a structured mock extractor in `src/lib/mock-extraction.ts`.
+
+- `src/app/api/prescriptions/extract/route.ts` is the API boundary for OCR/extraction.
+- Replace the mock extraction function with real OCR preprocessing and an LLM normalization step later.
+- The review screen is intentionally editable because handwritten prescriptions and imperfect OCR need human correction.
+
+## Verification
+
+The app was verified with:
+
+```bash
+npm run lint
+npm run build
+```
+
+## Product boundaries
+
+- No diagnosis generation
+- No treatment recommendation engine
+- No claim of medical certainty beyond record summarization
+- Patient-friendly wording is intentionally cautious and asks users to confirm details with their doctor or pharmacist

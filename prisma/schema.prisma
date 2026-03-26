@@ -1,0 +1,155 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  fullName  String
+  role      String   @default("DEMO")
+  patient   Patient?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Patient {
+  id                String      @id @default(cuid())
+  userId            String?     @unique
+  fullName          String
+  age               Int
+  gender            String
+  phone             String
+  bloodGroup        String?
+  allergiesNote     String?
+  chronicNote       String?
+  emergencyName     String?
+  emergencyPhone    String?
+  relationToPatient String?
+  city              String?
+  preferredLanguage String?
+  user              User?       @relation(fields: [userId], references: [id])
+  visits            Visit[]
+  allergies         Allergy[]
+  conditions        Condition[]
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+}
+
+model Doctor {
+  id           String   @id @default(cuid())
+  fullName     String
+  specialty    String?
+  hospitalName String?
+  phone        String?
+  city         String?
+  visits       Visit[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Visit {
+  id                  String               @id @default(cuid())
+  patientId           String
+  doctorId            String
+  visitDate           DateTime
+  complaint           String?
+  diagnosis           String?
+  visitType           String?
+  clinicName          String?
+  patientSummary      String?
+  doctorSummary       String?
+  notes               String?
+  patient             Patient              @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  doctor              Doctor               @relation(fields: [doctorId], references: [id])
+  prescriptions       Prescription[]
+  testRecommendations TestRecommendation[]
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+
+  @@index([patientId, visitDate])
+}
+
+model Prescription {
+  id                 String                   @id @default(cuid())
+  visitId            String
+  sourceType         String                   @default("uploaded")
+  sourceLabel        String?
+  extractedText      String?
+  reviewStatus       String                   @default("reviewed")
+  patientSafeSummary String?
+  notes              String?
+  visit              Visit                    @relation(fields: [visitId], references: [id], onDelete: Cascade)
+  medications        PrescriptionMedication[]
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
+}
+
+model Medication {
+  id                 String                   @id @default(cuid())
+  name               String                   @unique
+  category           String?
+  patientExplanation String?
+  caution            String?
+  prescriptionLinks  PrescriptionMedication[]
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
+}
+
+model PrescriptionMedication {
+  id              String       @id @default(cuid())
+  prescriptionId  String
+  medicationId    String
+  dosage          String?
+  frequency       String?
+  durationDays    Int?
+  instructions    String?
+  startDate       DateTime?
+  endDate         DateTime?
+  isCurrent       Boolean      @default(false)
+  reasonAsWritten String?
+  prescription    Prescription @relation(fields: [prescriptionId], references: [id], onDelete: Cascade)
+  medication      Medication   @relation(fields: [medicationId], references: [id])
+
+  @@index([prescriptionId])
+  @@index([medicationId])
+}
+
+model TestRecommendation {
+  id              String   @id @default(cuid())
+  visitId         String
+  testName        String
+  instructions    String?
+  status          String   @default("advised")
+  recommendedDate DateTime?
+  visit           Visit    @relation(fields: [visitId], references: [id], onDelete: Cascade)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Allergy {
+  id        String   @id @default(cuid())
+  patientId String
+  name      String
+  severity  String?
+  notes     String?
+  patient   Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Condition {
+  id          String   @id @default(cuid())
+  patientId   String
+  name        String
+  status      String?
+  diagnosedOn DateTime?
+  notes       String?
+  patient     Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
